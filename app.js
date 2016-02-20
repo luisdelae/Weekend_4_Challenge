@@ -16,9 +16,51 @@ if(process.env.DATABASE_URL != undefined) {
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.get('/get_tasks', function(req, res) {
 
+    var results = [];
 
-//get, post, and put requests go here
+    pg.connect(connectionString, function(err, client, done) {
+        var query = client.query('SELECT * FROM tasks');
+
+        query.on('row', function(row) {
+            results.push(row);
+        });
+
+        query.on('end', function() {
+            client.end();
+            console.log(results);
+            return res.json(results);
+        });
+
+        if(err) {
+            console.log(err);
+        }
+
+    });
+});
+
+app.post('/add_task', function(req, res) {
+    var addTask = {
+        task_id: req.body.task_id,
+        task_name: req.body.task_name,
+        task_status: req.body.task_status
+    };
+    pg.connect(connectionString, function(err, client, done) {
+        client.query('INSERT INTO tasks (task_name, task_status) ' +
+            'VALUES ($1, $2) RETURNING task_id, task_name, task_status;',
+            [addTask.task_name, addTask.task_status],
+            function(err, result) {
+                done();
+                if(err) {
+                    console.log('Error inserting data: ', err);
+                    res.send(false);
+                } else {
+                    res.send(result);
+                }
+            });
+    });
+});
 
 
 
