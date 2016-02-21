@@ -3,8 +3,6 @@ var app = express();
 var path = require('path');
 var bodyParser = require('body-parser');
 
-//bring in the pg module
-
 var pg = require('pg');
 var connectionString = '';
 if(process.env.DATABASE_URL != undefined) {
@@ -41,6 +39,7 @@ app.get('/get_tasks', function(req, res) {
 });
 
 app.post('/add_task', function(req, res) {
+    console.log(req.body);
     var addTask = {
         task_id: req.body.task_id,
         task_name: req.body.task_name,
@@ -62,7 +61,73 @@ app.post('/add_task', function(req, res) {
     });
 });
 
+app.post('/get_this_task', function(req, res) {
+    var results = [];
+    pg.connect(connectionString, function(err, client, done) {
+        var query = client.query('SELECT * FROM tasks WHERE task_id = ' + req.body.taskId);
 
+            query.on('row', function(row) {
+                results.push(row);
+            });
+
+            query.on('end', function () {
+                client.end();
+                console.log(results);
+                return res.json(results);
+            });
+
+        if (err) {
+            console.log(err);
+        }
+    });
+});
+
+app.post('/complete_task', function(req, res) {
+    console.log(req.body);
+
+    pg.connect(connectionString, function(err, client, done) {
+        client.query('UPDATE tasks SET task_status = true WHERE task_id = ' + req.body.taskId,
+            function(err, result) {
+                done();
+                if(err) {
+                    console.log('Error inserting data: ', err);
+                    res.send(false);
+                } else {
+                    res.send(result);
+                }
+            });
+    });
+});
+
+app.post('/redo_task', function(req, res) {
+    pg.connect(connectionString, function(err, client, done) {
+        client.query('UPDATE tasks SET task_status = false WHERE task_id = ' + req.body.taskId,
+            function(err, result) {
+                done();
+                if(err) {
+                    console.log('Error inserting data: ', err);
+                    res.send(false);
+                } else {
+                    res.send(result);
+                }
+            });
+    });
+});
+
+app.delete('/del_task', function (req, res) {
+   pg.connect(connectionString, function(err, client, done) {
+       client.query('DELETE FROM tasks WHERE task_id = ' + req.body.taskId,
+           function(err, result) {
+               done();
+               if(err) {
+                   console.log('Error inserting data: ', err);
+                   res.send(false);
+               } else {
+                   res.send(result);
+               }
+           });
+   });
+});
 
 app.get('/*', function(req, res) {
     var file = req.params[0] || '/views/index.html';

@@ -4,8 +4,8 @@ $(document).ready(function() {
 
     $('body').on('load', getTaskListOnLoad());
     $('#submit_task').on('click', submitTask);
-    $('#task-list').on('click', 'button', changeTaskStatus);
-    $('#task-list').on('click', 'button', deleteTask);
+    $('#task-list').on('click', '.task-complete', changeTaskStatus);
+    $('#task-list').on('click', '.task-delete', deleteTask);
 });
 
 var getTaskListOnLoad = function() {
@@ -36,7 +36,7 @@ var submitTask = function() {
         type: 'POST',
         url: '/add_task',
         data: values,
-        success: function (data) {
+        success: function(data) {
             appendTaskToDom(data.rows[0]);
         }
     });
@@ -62,19 +62,49 @@ var appendTaskToDom = function (taskInfo) {
 
 var changeTaskStatus = function() {
     event.preventDefault();
+    var taskIdString = $(this).parent().parent().parent().attr('id');
+    var taskIdObj = {taskId: taskIdString};
+    $.ajax({
+        type: 'POST',
+        url: '/get_this_task',
+        data: taskIdObj,
+        success: function(data){
+            var taskStatus = data[0].task_status;
+            if (taskStatus == false) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/complete_task',
+                    data: taskIdObj,
+                    success: $('#' + taskIdObj.taskId).addClass('green')
+                });
+
+            } else {
+                $.ajax({
+                    type: 'POST',
+                    url: '/redo_task',
+                    data: taskIdObj,
+                    success: $('#' + taskIdObj.taskId).removeClass('green')
+                });
+            }
+
+        }
+    });
 };
 
 var deleteTask = function() {
     event.preventDefault();
     var delMessage = 'Are you sure you want to delete this task? Press OK to delete.';
     var delConfirm = confirm(delMessage);
+    var taskIdString = $(this).parent().parent().parent().attr('id');
+    var taskIdObj = {taskId: taskIdString};
 
     if (delConfirm == true){
         $(this).parent().parent().parent().remove();
-        //$.ajax({
-        //    type: 'DEL',
-        //    url: '/del_task',
-        //    success: $(this).parent().parent().parent().remove();
-        //})
+        $.ajax({
+            type: 'DELETE',
+            url: '/del_task',
+            data: taskIdObj,
+            success: $(this).parent().parent().parent().remove()
+        });
         }
 };
