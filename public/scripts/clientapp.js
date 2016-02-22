@@ -4,7 +4,7 @@ $(document).ready(function() {
 
     $('body').on('load', getTaskListOnLoad());
     $('#submit_task').on('click', submitTask);
-    $('#task-list').on('click', '.task-complete', changeTaskStatus);
+    $('#task-list').on('click', '.task-complete', changeTaskStatusOnClick);
     $('#task-list').on('click', '.task-delete', deleteTask);
 });
 
@@ -15,6 +15,7 @@ var getTaskListOnLoad = function() {
         success: function(data) {
             data.forEach(function(taskInfo, i) {
                 appendTaskToDom(taskInfo);
+                getTaskStatusOnLoad(taskInfo);
             })
         }
     });
@@ -54,16 +55,16 @@ var appendTaskToDom = function (taskInfo) {
         taskStatus = 'Complete';
     }
 
-    $('#task-list').append('<div id="' + taskId + '" class="task"><ul><li>Task: ' + taskName +
-        '</li><li class="task-status">Status: ' + taskStatus + '</li>' +
-        '<li><button class="task-complete">Complete Task</button>' +
-        '<button class="task-delete">Delete Task</button></li></ul></div>');
-}
+    $('#task-list').append('<div id="' + taskId + '" class="task"><p>Task: ' + taskName +
+        '</p><p class="task-status' + taskId + '">Status: ' + taskStatus + '</p>' +
+        '<p><button class="task-complete">Complete Task</button>' +
+        '<button class="task-delete">Delete Task</button></p></ul></div>');
+};
 
-var changeTaskStatus = function() {
+var changeTaskStatusOnClick = function() {
     event.preventDefault();
-    var taskIdString = $(this).parent().parent().parent().attr('id');
-    var taskIdObj = {taskId: taskIdString};
+    var taskIdString = $(this).parent().parent().attr('id');
+    var taskIdObj = {task_id: taskIdString};
     $.ajax({
         type: 'POST',
         url: '/get_this_task',
@@ -75,7 +76,11 @@ var changeTaskStatus = function() {
                     type: 'POST',
                     url: '/complete_task',
                     data: taskIdObj,
-                    success: $('#' + taskIdObj.taskId).addClass('green')
+                    success: function() {
+                        $('#' + taskIdObj.task_id).addClass('completed-task');
+                        $('.task-status' + taskIdObj.task_id).text('Status: Complete');
+                        $('#' + taskIdObj.task_id).find('.task-complete').text('Redo Task');
+                    }
                 });
 
             } else {
@@ -83,7 +88,11 @@ var changeTaskStatus = function() {
                     type: 'POST',
                     url: '/redo_task',
                     data: taskIdObj,
-                    success: $('#' + taskIdObj.taskId).removeClass('green')
+                    success: function() {
+                        $('#' + taskIdObj.task_id).removeClass('completed-task');
+                        $('.task-status' + taskIdObj.task_id).text('Status: Incomplete');
+                        $('#' + taskIdObj.task_id).find('.task-complete').text('Complete Task');
+                    }
                 });
             }
 
@@ -95,16 +104,30 @@ var deleteTask = function() {
     event.preventDefault();
     var delMessage = 'Are you sure you want to delete this task? Press OK to delete.';
     var delConfirm = confirm(delMessage);
-    var taskIdString = $(this).parent().parent().parent().attr('id');
-    var taskIdObj = {taskId: taskIdString};
+    var taskIdString = $(this).parent().parent().attr('id');
+    var taskIdObj = {task_id: taskIdString};
 
     if (delConfirm == true){
-        $(this).parent().parent().parent().remove();
+        $(this).parent().parent().remove();
         $.ajax({
             type: 'DELETE',
             url: '/del_task',
             data: taskIdObj,
-            success: $(this).parent().parent().parent().remove()
+            success: $(this).parent().parent().remove()
         });
         }
+
+
+};
+
+var getTaskStatusOnLoad = function(data) {
+    var taskStatus = data.task_status;
+    if (taskStatus == true) {
+        $('#' + data.task_id).addClass('completed-task');
+        $('#' + data.task_id).find('.task-complete').text('Redo Task');
+
+    } else {
+        $('#' + data.task_id).removeClass('completed-task')
+        $('#' + data.task_id).find('.task-complete').text('Complete Task');
+    }
 };

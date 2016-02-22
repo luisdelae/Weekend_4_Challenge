@@ -1,7 +1,74 @@
-li {
-    list-style: none;
+body {
+    background: linear-gradient( rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1) ),url("../images/corckboard-background.jpg");
+    background-size: cover;
+    font-family: “Courier new”, Courier, “Andale Mono”;
+    vertical-align: middle;
+    text-align: center;
 }
 
-.green {
-    background-color: green;
+h1{
+    margin: 10px auto 10px auto;
+    line-height: 50px;
+    background-color: rgba(192,192,192,0.7);
+    border: 2px solid;
+    border-radius: 10px;
+    font-size: 25px;
+    width: 20%;
 }
+
+#taskCreateForm {
+    margin: 20px;
+}
+
+#task_name {
+    font-family: “Courier new”, Courier, “Andale Mono”;
+    height: 40px;
+    width: 400px;
+    font-size: 20px;
+}
+
+button {
+    font-family: “Courier new”, Courier, “Andale Mono”;
+}
+
+button:hover {
+    background-color: #bababa;
+}
+
+#submit_task {
+    height: 40px;
+    font-size: 20px;
+}
+
+#task-list button {
+    height: 30px;
+    font-size: 10px;
+}
+
+#task-list {
+    margin: auto;
+    width: 77%;
+}
+
+.task {
+    padding-top: 20px;
+    border: 2px solid;
+    border-radius: 5px;
+    background-color: #af94c9;
+    height: 170px;
+    width: 200px;
+    margin: 5px;
+    display: inline;
+    float: left;
+}
+
+.task p {
+    margin: 5px;
+}
+
+.completed-task {
+    background-color: #5e805d;
+}
+
+
+

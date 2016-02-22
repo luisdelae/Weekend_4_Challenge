@@ -64,7 +64,7 @@ app.post('/add_task', function(req, res) {
 app.post('/get_this_task', function(req, res) {
     var results = [];
     pg.connect(connectionString, function(err, client, done) {
-        var query = client.query('SELECT * FROM tasks WHERE task_id = ' + req.body.taskId);
+        var query = client.query('SELECT * FROM tasks WHERE task_id = ' + req.body.task_id);
 
             query.on('row', function(row) {
                 results.push(row);
@@ -83,10 +83,9 @@ app.post('/get_this_task', function(req, res) {
 });
 
 app.post('/complete_task', function(req, res) {
-    console.log(req.body);
 
     pg.connect(connectionString, function(err, client, done) {
-        client.query('UPDATE tasks SET task_status = true WHERE task_id = ' + req.body.taskId,
+        client.query('UPDATE tasks SET task_status = true WHERE task_id = ' + req.body.task_id,
             function(err, result) {
                 done();
                 if(err) {
@@ -101,7 +100,7 @@ app.post('/complete_task', function(req, res) {
 
 app.post('/redo_task', function(req, res) {
     pg.connect(connectionString, function(err, client, done) {
-        client.query('UPDATE tasks SET task_status = false WHERE task_id = ' + req.body.taskId,
+        client.query('UPDATE tasks SET task_status = false WHERE task_id = ' + req.body.task_id,
             function(err, result) {
                 done();
                 if(err) {
@@ -116,7 +115,7 @@ app.post('/redo_task', function(req, res) {
 
 app.delete('/del_task', function (req, res) {
    pg.connect(connectionString, function(err, client, done) {
-       client.query('DELETE FROM tasks WHERE task_id = ' + req.body.taskId,
+       client.query('DELETE FROM tasks WHERE task_id = ' + req.body.task_id,
            function(err, result) {
                done();
                if(err) {
