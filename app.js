@@ -19,7 +19,7 @@ app.get('/get_tasks', function(req, res) {
     var results = [];
 
     pg.connect(connectionString, function(err, client, done) {
-        var query = client.query('SELECT * FROM tasks');
+        var query = client.query('SELECT * FROM tasks ORDER BY task_status ASC, task_id DESC');
 
         query.on('row', function(row) {
             results.push(row);

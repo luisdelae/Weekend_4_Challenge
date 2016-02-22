@@ -51,6 +51,10 @@ button:hover {
 }
 
 .task {
+    background-image: url("../images/pushpin.gif");
+    background-position: left top;
+    background-repeat: no-repeat;
+    background-size: 40px;
     padding-top: 20px;
     border: 2px solid;
     border-radius: 5px;
